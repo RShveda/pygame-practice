@@ -6,17 +6,17 @@ pygame.init()
 FPS = 30
 WIDTH, HEIGHT = 400, 600
 
-# environment
+# environment colors
 blue = (54, 247, 244)
 green = (57, 250, 27)
 yellow = (240, 255, 33)
 
-# tree
+# tree colors
 dark_green = (33, 148, 52)
 white_grey = (237, 230, 230)
 orange = (247, 228, 183)
 
-# unicorn
+# unicorn colors
 white = (250, 250, 250)
 pink = (252, 177, 231)
 purple = (231, 139, 247)
@@ -30,31 +30,47 @@ black = (0, 0, 0)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen.fill(blue)
 grass = rect(screen, green, (0, int(HEIGHT * 0.45), WIDTH, int(HEIGHT * 0.55)))
-sun = circle(screen, yellow, (WIDTH - 20, 40), 80)
+
+
+class Sun():
+    width = 200
+    height = 200
+
+    def __init__(self):
+        self.layer = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        for i in range(int(self.width/2), 0, -2):
+            circle(self.layer, (240, 255, 33, int(256-(256/100*i))), (int(self.width/2), int(self.height/2)), i)
 
 
 class Tree():
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
+    width = 200
+    height = 340
+
+    def __init__(self):
         self.layer = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        # self.border = rect(self.layer, black, (0, 0, self.width, self.height), 1)
-        self.stem = rect(self.layer, white_grey, (int(self.width / 2 - 15), int(self.height - 100), 30, 80))
-        self.bottom_leaves = ellipse(self.layer, dark_green,
-                                     (int(self.width / 2 - 55), int(self.height - 150), 110, 90))
-        ellipse(self.layer, orange, (int(self.width / 2 + 20), int(self.height - 95), 28, 28))
-        self.middle_leaves = ellipse(self.layer, dark_green,
-                                     (int(self.width / 2 - 90), int(self.height - 225), 180, 110))
-        ellipse(self.layer, orange, (int(self.width / 2 - 70), int(self.height - 180), 28, 28))
-        ellipse(self.layer, orange, (int(self.width / 2 + 55), int(self.height - 180), 30, 28))
-        self.top_leaves = ellipse(self.layer, dark_green, (int(self.width / 2 - 55), int(self.height - 300), 110, 150))
-        ellipse(self.layer, orange, (int(self.width / 2 + 15), int(self.height - 270), 28, 28))
+        self.stem = rect(self.layer, white_grey, (85, 240, 30, 80))
+        # top leaves
+        ellipse(self.layer, dark_green, (45, 40, 110, 150))
+        ellipse(self.layer, green, (45, 40, 110, 150), 1)
+        ellipse(self.layer, orange, (115, 70, 28, 28))
+        ellipse(self.layer, green, (115, 70, 28, 28), 1)
+        # middle leaves
+        ellipse(self.layer, dark_green, (10, 115, 180, 110))
+        ellipse(self.layer, green, (10, 115, 180, 110), 2)
+        ellipse(self.layer, orange, (30, 160, 28, 28))
+        ellipse(self.layer, green, (30, 160, 28, 28), 1)
+        ellipse(self.layer, orange, (155, 160, 30, 28))
+        ellipse(self.layer, green, (155, 160, 30, 28), 1)
+        # bottom leaves
+        ellipse(self.layer, dark_green, (45, 190, 110, 90))
+        ellipse(self.layer, green, (45, 190, 110, 90), 1)
+        ellipse(self.layer, orange, (120, 245, 28, 28))
+        ellipse(self.layer, green, (120, 245, 28, 28), 1)
 
 
 class Hair():
     def __init__(self):
         self.layer = pygame.Surface((90, 90), pygame.SRCALPHA)
-        # rect(self.layer, black, (0, 0, 90, 90), 1)
         ellipse(self.layer, pink, (40, 19, 35, 12))
         ellipse(self.layer, brownish, (30, 25, 32, 22))
         ellipse(self.layer, greenish, (50, 57, 30, 14))
@@ -71,56 +87,77 @@ class Hair():
 
 
 class Unicorn():
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
+    width = 300
+    height = 280
+
+    def __init__(self):
         self.layer = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        # self.border = rect(self.layer, black, (0, 0, self.width, self.height), 1)
+        # tail
         tail_top = Hair()
         tail_bottom = Hair()
         rotated_hair = pygame.transform.flip(tail_bottom.layer, True, False)
         self.layer.blit(rotated_hair, (0, 152))
         self.layer.blit(tail_top.layer, (5, 130))
-        self.body = ellipse(self.layer, white, (60, int(self.height - 150), 160, 70))
+        # body
+        self.body = ellipse(self.layer, white, (60, 130, 160, 70))
         # legs
-        rect(self.layer, white, (75, int(self.height - 110), 15, 80))
-        rect(self.layer, white, (105, int(self.height - 110), 15, 70))
-        rect(self.layer, white, (165, int(self.height - 110), 15, 85))
-        rect(self.layer, white, (195, int(self.height - 110), 12, 70))
+        rect(self.layer, white, (75, 170, 15, 80))
+        rect(self.layer, white, (105, 170, 15, 70))
+        rect(self.layer, white, (165, 170, 15, 85))
+        rect(self.layer, white, (195, 170, 12, 70))
         # neck
-        polygon(self.layer, white, [(130, int(self.height - 110)),
-                                    (210, int(self.height - 110)),
-                                    (210, int(self.height - 190)),
-                                    (175, int(self.height - 190))
-                                    ])
+        polygon(self.layer, white, [(130, 170), (210, 170), (210, 90), (175, 90), ])
         # head
         ellipse(self.layer, white, (175, int(self.height - 210), 48, 38))
         # mouth
         ellipse(self.layer, white, (195, int(self.height - 200), 50, 25))
         # corn
-        polygon(self.layer, pink, [(190, int(self.height - 208)),
-                                   (203, int(self.height - 208)),
-                                   (203, int(self.height - 270)),
-                                   ])
+        polygon(self.layer, pink, [(190, 72), (203, 72), (203, 10), ])
         # eye
-        ellipse(self.layer, purple, (198, int(self.height - 200), 15, 13))
-        ellipse(self.layer, black, (205, int(self.height - 197), 6, 6))
+        ellipse(self.layer, purple, (198, 80, 15, 13))
+        ellipse(self.layer, black, (205, 83, 6, 6))
         eye_blink = pygame.Surface((8, 8), pygame.SRCALPHA)
         ellipse(eye_blink, white, (0, 4, 7, 4))
         rotated_blink = pygame.transform.rotate(eye_blink, -30)
-        self.layer.blit(rotated_blink, (202, int(self.height - 203)))
+        self.layer.blit(rotated_blink, (202, 77))
         # hair
         ellipse(self.layer, pink, (170, 68, 25, 15))
         ellipse(self.layer, brownish, (160, 85, 30, 15))
         hair = Hair()
-        self.layer.blit(hair.layer, (110, int(self.height - 220)))
+        self.layer.blit(hair.layer, (110, 60))
 
 
-tree = Tree(200, 340)
-unicorn = Unicorn(300, 280)
+# initializing objects
+sun = Sun()
 
-screen.blit(tree.layer, (-25, 70))
-screen.blit(unicorn.layer, (120, 250))
+tree_one = pygame.transform.scale(Tree().layer, (230, 320))
+tree_two = pygame.transform.scale(Tree().layer, (180, 180))
+tree_three = pygame.transform.scale(Tree().layer, (150, 340))
+tree_four = pygame.transform.scale(Tree().layer, (150, 255))
+tree_five = pygame.transform.scale(Tree().layer, (150, 255))
+
+x = Unicorn.width
+y = Unicorn.height
+unicorn_one = pygame.transform.scale(Unicorn().layer, (int(x/1.1), int(y/1.1)))
+unicorn_two = pygame.transform.scale(Unicorn().layer, (int(x/2.3), int(y/2.3)))
+unicorn_rotated = pygame.transform.flip(Unicorn().layer, True, False)
+unicorn_three = pygame.transform.scale(unicorn_rotated, (int(x/1.8), int(y/1.8)))
+unicorn_four = pygame.transform.scale(unicorn_rotated, (int(x/5), int(y/5)))
+
+# placing objects on main screen
+screen.blit(sun.layer, (200, 0))
+
+screen.blit(tree_one, (10, -35))
+screen.blit(tree_two, (50, 170))
+screen.blit(tree_three, (-60, 40))
+screen.blit(tree_five, (20, 210))
+screen.blit(tree_four, (-25, 310))
+
+screen.blit(unicorn_one, (95, 340))
+screen.blit(unicorn_two, (190, 225))
+screen.blit(unicorn_three, (275, 300))
+screen.blit(unicorn_four, (320, 230))
+
 
 pygame.display.update()
 clock = pygame.time.Clock()
