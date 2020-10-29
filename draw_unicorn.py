@@ -1,3 +1,5 @@
+"""assignment to draw a picture as here: http://cs.mipt.ru/python/images/lab4/10_2.png"""
+
 import pygame
 from pygame.draw import *
 
