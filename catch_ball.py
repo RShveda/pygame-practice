@@ -4,20 +4,17 @@ from random import randint, uniform, random, choice
 import numpy as np
 import json
 
-pygame.init()
 
 WIDTH = 800
 HEIGHT = 600
 
 FPS = 10
 MAX_BALLS = 10
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-score = 0
 
 CREEP_FILENAMES = [
-        'bluecreep.png',
-        'pinkcreep.png',
-        'graycreep.png']
+    'bluecreep.png',
+    'pinkcreep.png',
+    'graycreep.png']
 
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
@@ -29,16 +26,12 @@ BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 
-def draw_scoreboard(score):
+
+def draw_scoreboard(score, screen):
     text = "Your score is {}".format(score)
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
     textsurface = myfont.render(text, False, (255, 255, 255))
     screen.blit(textsurface, (0, 0))
-    # for position, record in enumerate(scores_data):
-    #     text = str(position + 1) + ". {} - {}".format(record["name"], record["score"])
-    #     textsurface = myfont.render(text, False, (255, 255, 255))
-    #     screen.blit(textsurface, (WIDTH*0.75, position * HEIGHT/20))
-
 
 
 def bounce_off_walls(coords, radius, direction, is_ball):
@@ -56,23 +49,23 @@ def bounce_off_walls(coords, radius, direction, is_ball):
     elif coords_y > HEIGHT - radius:
         coords_y = HEIGHT - radius
         direction_y *= -1
-    else:  # creeps unique ability to rotate randomly
+    else:  # creeps unique ability to bounce from imaginary walls
         if not is_ball:
-            if random() < 0.1:
+            if random() < 0:
                 direction_x *= -1
-            if random() < 0.1:
+            if random() < 0:
                 direction_y *= -1
     return (direction_x, direction_y), (coords_x, coords_y)
 
 
-def rotate_image(image, coords, direction):
+def rotate_image(image, direction):
     v = np.array(direction)
     direction_angle = np.arctan2(v[1], v[0]) / np.pi * 180
     image = pygame.transform.rotate(image, -direction_angle)
     return image
 
 
-def blit_creep(image, coords):
+def blit_creep(screen, image, coords):
     image_w, image_h = image.get_size()
     draw_pos = image.get_rect().move(
         coords[0] - image_w / 2,
@@ -80,7 +73,7 @@ def blit_creep(image, coords):
     screen.blit(image, draw_pos)
 
 
-def show_balls(balls):
+def show_balls(screen, balls):
     speed = 5
     for key, ball in enumerate(balls):
         is_ball, coords, direction, radius, fill = ball
@@ -93,12 +86,12 @@ def show_balls(balls):
         else:
             img_name = fill
             image = pygame.image.load(img_name).convert_alpha()
-            rotated_image = rotate_image(image, new_coords, new_direction)
-            blit_creep(rotated_image, new_coords)
+            rotated_image = rotate_image(image, new_direction)
+            blit_creep(screen, rotated_image, new_coords)
             balls[key] = (is_ball, new_coords, new_direction, radius, fill)
 
 
-def new_ball():
+def new_ball(screen, balls):
     """draw a new ball"""
     x_direction = uniform(-1, 1)
     y_direction = uniform(-1, 1)
@@ -111,7 +104,7 @@ def new_ball():
         image_width, image_height = image.get_size()
         radius = int((image_height + image_width)/4)
         balls.append((is_ball, (x, y), (x_direction, y_direction), radius, img_filename))
-        blit_creep(image, (x, y))
+        blit_creep(screen, image, (x, y))
     else:
         r = randint(10, 100)
         color = COLORS[randint(0, 5)]
@@ -134,7 +127,7 @@ def click(event, balls, score):
     return score
 
 
-def game_over(score, player_name, scores_data):
+def game_over(screen, score, player_name, scores_data, show_ranking):
     gameover_surface = pygame.Surface((WIDTH/1.5, HEIGHT/2), pygame.SRCALPHA)
     gameover_surface_size = gameover_surface.get_size()
     text_area("GAME OVER", gameover_surface, 0)
@@ -198,52 +191,56 @@ def load_scores():
     return data
 
 
-pygame.display.update()
-clock = pygame.time.Clock()
-finished = False
-balls = []
-is_game_over = False
-show_ranking = False
-player_name = ''
-scores_data = load_scores()
 
-
-while not finished:
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            finished = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if not is_game_over:
-                score = click(event, balls, score)
-        elif event.type == pygame.KEYDOWN:
-            print(is_game_over, show_ranking)
-            if is_game_over:
-                if show_ranking:
-                    if event.key == pygame.K_RETURN:
-                        # scores_data = add_to_ranking(score, player_name, scores_data)
-                        print(scores_data)
-                        finished = True
-                else:
-                    if event.key == pygame.K_RETURN:
-                        scores_data = add_to_ranking(score, player_name, scores_data)
-                        score = 0
-                        save_scores(scores_data)
-                        show_ranking = True
-                    elif event.key == pygame.K_BACKSPACE:
-                        player_name = player_name[:-1]
-                    else:
-                        player_name += event.unicode
-
-    show_balls(balls)
-    draw_scoreboard(score)
-    if len(balls) < MAX_BALLS:
-        if random() < 0.2:
-            new_ball()
-    else:
-        game_over(score, player_name, scores_data)
-        is_game_over = True
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    score = 0
     pygame.display.update()
-    screen.fill(BLACK)
+    clock = pygame.time.Clock()
+    finished = False
+    balls = []
+    is_game_over = False
+    show_ranking = False
+    player_name = ''
+    scores_data = load_scores()
 
-pygame.quit()
+    while not finished:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finished = True
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if not is_game_over:
+                    score = click(event, balls, score)
+            elif event.type == pygame.KEYDOWN:
+                print(is_game_over, show_ranking)
+                if is_game_over:
+                    if show_ranking:
+                        if event.key == pygame.K_RETURN:
+                            print(scores_data)
+                            finished = True
+                    else:
+                        if event.key == pygame.K_RETURN:
+                            scores_data = add_to_ranking(score, player_name, scores_data)
+                            score = 0
+                            save_scores(scores_data)
+                            show_ranking = True
+                        elif event.key == pygame.K_BACKSPACE:
+                            player_name = player_name[:-1]
+                        else:
+                            player_name += event.unicode
+        show_balls(screen, balls)
+        draw_scoreboard(score, screen)
+        if len(balls) < MAX_BALLS:
+            if random() < 0.2:
+                new_ball(screen, balls)
+        else:
+            game_over(screen, score, player_name, scores_data, show_ranking)
+            is_game_over = True
+        pygame.display.update()
+        screen.fill(BLACK)
+    pygame.quit()
+
+if __name__ == '__main__':
+    main()
