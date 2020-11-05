@@ -58,5 +58,6 @@ def main():
         screen.fill(cons.BLACK)
     pygame.quit()
 
+
 if __name__ == '__main__':
     main()

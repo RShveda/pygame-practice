@@ -22,16 +22,16 @@ def new_ball(balls: list):
     x = randint(100, cons.WIDTH - 100)
     y = randint(100, cons.HEIGHT - 100)
     if random() < 0.1:
-        img_filename = choice(cons.CREEP_FILENAMES)
         is_ball = False
+        img_filename = choice(cons.CREEP_FILENAMES)
         image = pygame.image.load(img_filename).convert_alpha()
         image_width, image_height = image.get_size()
         radius = int((image_height + image_width)/4)
         balls.append((is_ball, (x, y), (x_direction, y_direction), radius, img_filename))
     else:
-        radius = randint(10, 100)
-        color = cons.COLORS[randint(0, 5)]
         is_ball = True
+        color = cons.COLORS[randint(0, 5)]
+        radius = randint(10, 100)
         balls.append((is_ball, (x, y), (x_direction, y_direction), radius, color))
 
 
@@ -46,8 +46,8 @@ def move_balls(screen: pygame.Surface, balls: list):
     speed = 5
     for key, ball in enumerate(balls):
         is_ball, coords, direction, radius, fill = ball
-        ball = shift_ball(ball, speed)
-        new_direction, new_coords = bounce_off_walls(ball)
+        shifted_ball = shift_ball(ball, speed)
+        new_direction, new_coords = bounce_off_walls(shifted_ball)
         balls[key] = (is_ball, new_coords, new_direction, radius, fill)
         if ball[0]:
             color = fill
@@ -121,9 +121,9 @@ def click(event: pygame.MOUSEBUTTONDOWN, balls: list, score: int):
     return score
 
 
-def add_to_ranking(score: int, player_name: str, scores_data:list):
+def add_to_ranking(score: int, player_name: str, scores_data: list):
     """
-    Helper function to check if final score is qualified for Top3 and insert it in appropriate
+    Helper function to insert player result into top 3 list.
     position.
     :param score: player final score
     :param player_name: player name
