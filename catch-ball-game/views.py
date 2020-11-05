@@ -1,9 +1,6 @@
 import pygame
-from pygame.draw import *
 import numpy as np
 import constants as cons
-
-print("views.py imported")
 
 
 def draw_scoreboard(screen, score):
