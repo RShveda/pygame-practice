@@ -44,7 +44,7 @@ def game_over_view(screen, score, player_name, scores_data, show_ranking):
     gameover_surface = pygame.Surface((cons.WIDTH/1.5, cons.HEIGHT/2), pygame.SRCALPHA)
     gameover_surface_size = gameover_surface.get_size()
     text_area("GAME OVER", gameover_surface, 0)
-    player_rank = is_winer(score, scores_data)
+    player_rank = is_winner(score, scores_data)
     if player_rank is not False:  # player_name_input
         text_area("You got into TOP 3!", gameover_surface, 0.5)
         text_area("Type your name:", gameover_surface, 1)
@@ -60,7 +60,7 @@ def game_over_view(screen, score, player_name, scores_data, show_ranking):
     screen.blit(gameover_surface, coords)
 
 
-def is_winer(score, scores_data):
+def is_winner(score, scores_data):
     for position, record in enumerate(scores_data):
         if score > record["score"]:
             return position

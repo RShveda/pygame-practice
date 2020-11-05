@@ -7,6 +7,10 @@ import constants as cons
 
 
 def main():
+    """
+    Main function of the module which is responsible for variables initialisation
+    and game event loop.
+    """
     pygame.init()
     screen = pygame.display.set_mode((cons.WIDTH, cons.HEIGHT))
     clock = pygame.time.Clock()
