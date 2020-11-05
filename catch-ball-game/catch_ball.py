@@ -8,8 +8,8 @@ import constants as cons
 print("catch_ball.py imported")
 
 
-def new_ball(screen, balls):
-    """draw a new ball"""
+def new_ball(balls):
+    """create a new ball"""
     x_direction = uniform(-1, 1)
     y_direction = uniform(-1, 1)
     x = randint(100, cons.WIDTH - 100)
@@ -21,13 +21,25 @@ def new_ball(screen, balls):
         image_width, image_height = image.get_size()
         radius = int((image_height + image_width)/4)
         balls.append((is_ball, (x, y), (x_direction, y_direction), radius, img_filename))
-        views.blit_creep(screen, image, (x, y))
     else:
         r = randint(10, 100)
         color = cons.COLORS[randint(0, 5)]
         is_ball = True
         balls.append((is_ball, (x, y), (x_direction, y_direction), r, color))
-        circle(screen, color, (x, y), r)
+
+
+def move_balls(screen, balls):
+    speed = 5
+    for key, ball in enumerate(balls):
+        is_ball, coords, direction, radius, fill = ball
+        coords = (int(coords[0] + direction[0] * speed), int(coords[1] + direction[1] * speed))
+        new_direction, new_coords = bounce_off_walls(coords, radius, direction, is_ball)
+        balls[key] = (is_ball, new_coords, new_direction, radius, fill)
+        if ball[0]:
+            color = fill
+            circle(screen, color, new_coords, radius)
+        else:
+            views.blit_creep(screen, balls[key])
 
 
 def bounce_off_walls(coords, radius, direction, is_ball):
@@ -68,26 +80,6 @@ def click(event, balls, score):
     return score
 
 
-def game_over(screen, score, player_name, scores_data, show_ranking):
-    gameover_surface = pygame.Surface((cons.WIDTH/1.5, cons.HEIGHT/2), pygame.SRCALPHA)
-    gameover_surface_size = gameover_surface.get_size()
-    views.text_area("GAME OVER", gameover_surface, 0)
-    rank = is_winer(score, scores_data)
-    if rank is not False:
-        views.text_area("You got into TOP 3!", gameover_surface, 0.5)
-        views.text_area("Type your name:", gameover_surface, 1)
-        views.text_area("{}_".format(player_name), gameover_surface, 2)
-    else:
-        if not show_ranking:
-            views.text_area("Press Enter to continue", gameover_surface, 0.5)
-        else:
-            views.text_area("Best results:", gameover_surface, 0.5)
-            for position, record in enumerate(scores_data):
-                views.text_area(str(position+1) + ". {} - {}".format(record["name"], record["score"]), gameover_surface, position*0.5+1)
-    coords = ((cons.WIDTH - gameover_surface_size[0])/2, (cons.HEIGHT - gameover_surface_size[1])/2)
-    screen.blit(gameover_surface, coords)
-
-
 def add_to_ranking(score, player_name, scores_data):
     for position, record in enumerate(scores_data):
         if score > record["score"]:
@@ -95,13 +87,6 @@ def add_to_ranking(score, player_name, scores_data):
             scores_data.insert(position, new_record)
             return scores_data[:3]
     return scores_data[:3]
-
-
-def is_winer(score, scores_data):
-    for position, record in enumerate(scores_data):
-        if score > record["score"]:
-            return position
-    return False
 
 
 def save_scores(scores_data):
@@ -145,7 +130,6 @@ def main():
                 if not is_game_over:
                     score = click(event, balls, score)
             elif event.type == pygame.KEYDOWN:
-                print(is_game_over, show_ranking)
                 if is_game_over:
                     if show_ranking:
                         if event.key == pygame.K_RETURN:
@@ -161,13 +145,13 @@ def main():
                             player_name = player_name[:-1]
                         else:
                             player_name += event.unicode
-        views.show_balls(screen, balls)
-        views.draw_scoreboard(score, screen)
+        move_balls(screen, balls)
+        views.draw_scoreboard(screen, score)
         if len(balls) < cons.MAX_BALLS:
             if random() < 0.2:
-                new_ball(screen, balls)
+                new_ball(balls)
         else:
-            game_over(screen, score, player_name, scores_data, show_ranking)
+            views.game_over_view(screen, score, player_name, scores_data, show_ranking)
             is_game_over = True
         pygame.display.update()
         screen.fill(cons.BLACK)

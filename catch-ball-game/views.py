@@ -1,12 +1,12 @@
 import pygame
 from pygame.draw import *
 import numpy as np
-import catch_ball
+import constants as cons
 
 print("views.py imported")
 
 
-def draw_scoreboard(score, screen):
+def draw_scoreboard(screen, score):
     text = "Your score is {}".format(score)
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
     textsurface = myfont.render(text, False, (255, 255, 255))
@@ -20,30 +20,17 @@ def rotate_image(image, direction):
     return image
 
 
-def blit_creep(screen, image, coords):
+def blit_creep(screen, ball):
+    coords = ball[1]
+    direction = ball[2]
+    img_name = ball[4]
+    init_image = pygame.image.load(img_name).convert_alpha()
+    image = rotate_image(init_image, direction)
     image_w, image_h = image.get_size()
     draw_pos = image.get_rect().move(
         coords[0] - image_w / 2,
         coords[1] - image_h / 2)
     screen.blit(image, draw_pos)
-
-
-def show_balls(screen, balls):
-    speed = 5
-    for key, ball in enumerate(balls):
-        is_ball, coords, direction, radius, fill = ball
-        coords = (int(coords[0] + direction[0] * speed), int(coords[1] + direction[1] * speed))
-        new_direction, new_coords = catch_ball.bounce_off_walls(coords, radius, direction, is_ball)
-        if ball[0]:
-            color = fill
-            circle(screen, color, new_coords, radius)
-            balls[key] = (is_ball, new_coords, new_direction, radius, color)
-        else:
-            img_name = fill
-            image = pygame.image.load(img_name).convert_alpha()
-            rotated_image = rotate_image(image, new_direction)
-            blit_creep(screen, rotated_image, new_coords)
-            balls[key] = (is_ball, new_coords, new_direction, radius, fill)
 
 
 def text_area(text, surface, position):
@@ -54,3 +41,30 @@ def text_area(text, surface, position):
     text_width = max(300, text_surface.get_width() + 10)
     coords = ((width - text_width)/2, position * height/3)
     surface.blit(text_surface, coords)
+
+
+def game_over_view(screen, score, player_name, scores_data, show_ranking):
+    gameover_surface = pygame.Surface((cons.WIDTH/1.5, cons.HEIGHT/2), pygame.SRCALPHA)
+    gameover_surface_size = gameover_surface.get_size()
+    text_area("GAME OVER", gameover_surface, 0)
+    player_rank = is_winer(score, scores_data)
+    if player_rank is not False:  # player_name_input
+        text_area("You got into TOP 3!", gameover_surface, 0.5)
+        text_area("Type your name:", gameover_surface, 1)
+        text_area("{}_".format(player_name), gameover_surface, 2)
+    else:
+        if not show_ranking: # show_game_over
+            text_area("Press Enter to continue", gameover_surface, 0.5)
+        else: # show_top_rank
+            text_area("Best results:", gameover_surface, 0.5)
+            for position, record in enumerate(scores_data):
+                text_area(str(position+1) + ". {} - {}".format(record["name"], record["score"]), gameover_surface, position*0.5+1)
+    coords = ((cons.WIDTH - gameover_surface_size[0])/2, (cons.HEIGHT - gameover_surface_size[1])/2)
+    screen.blit(gameover_surface, coords)
+
+
+def is_winer(score, scores_data):
+    for position, record in enumerate(scores_data):
+        if score > record["score"]:
+            return position
+    return False
