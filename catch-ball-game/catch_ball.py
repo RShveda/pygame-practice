@@ -46,7 +46,7 @@ def main():
                         else:
                             player_name += event.unicode
         move_balls(screen, balls)
-        if show_ranking is False:
+        if show_ranking is False:  # hides score board after user inputted name
             draw_scoreboard(screen, score)
         if len(balls) < cons.MAX_BALLS:
             if random() < 0.2:
