@@ -1,8 +1,8 @@
 import pygame
 from random import random
-from models import save_scores, load_scores
-from views import draw_scoreboard, game_over_view
-from controllers import new_ball, move_balls, click, add_to_ranking
+from models import save_scores, load_scores, new_ball, move_balls, add_to_ranking
+from views import draw_scoreboard, game_over_view, blank_screen
+from controllers import click
 import constants as cons
 
 
@@ -12,7 +12,6 @@ def main():
     and game event loop.
     """
     pygame.init()
-    screen = pygame.display.set_mode((cons.WIDTH, cons.HEIGHT))
     clock = pygame.time.Clock()
     scores_data = load_scores()
     score = 0
@@ -45,17 +44,17 @@ def main():
                             player_name = player_name[:-1]
                         else:
                             player_name += event.unicode
-        move_balls(screen, balls)
+        move_balls(balls)
         if show_ranking is False:  # hides score board after user inputted name
-            draw_scoreboard(screen, score)
+            draw_scoreboard(score)
         if len(balls) < cons.MAX_BALLS:
             if random() < 0.2:
                 new_ball(balls)
         else:
-            game_over_view(screen, score, player_name, scores_data, show_ranking)
+            game_over_view(score, player_name, scores_data, show_ranking)
             is_game_over = True
         pygame.display.update()
-        screen.fill(cons.BLACK)
+        blank_screen()
     pygame.quit()
 
 

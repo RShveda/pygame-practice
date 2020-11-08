@@ -1,12 +1,23 @@
 import pygame
+from pygame.draw import *
 import numpy as np
 import constants as cons
 
 
-def draw_scoreboard(screen: pygame.Surface, score: int):
+screen = pygame.display.set_mode((cons.WIDTH, cons.HEIGHT))
+
+
+def blit_circle(color, coords, radius):
+    circle(screen, color, coords, radius)
+
+
+def blank_screen():
+    screen.fill(cons.BLACK)
+
+
+def draw_scoreboard(score: int):
     """
     Function that draw current player score in top left corner of game screen
-    :param screen: game screen
     :param score: current player score
     :return:
     """
@@ -29,10 +40,9 @@ def rotate_image(image: pygame.Surface, direction: tuple):
     return image
 
 
-def blit_creep(screen: pygame.Surface, ball: tuple):
+def blit_creep(ball: tuple):
     """
     Function which draw creep on a game screen. Creep center is located at its coordinates.
-    :param screen: game screen
     :param ball: ball of creep type
     """
     coords = ball[1]
@@ -63,13 +73,12 @@ def text_area(text: str, surface: pygame.Surface, position: float):
     surface.blit(text_surface, coords)
 
 
-def game_over_view(screen: pygame.Surface, score: int, player_name: str,
+def game_over_view(score: int, player_name: str,
                    scores_data: list, show_ranking: bool):
     """
     Function that draw game over screen and updates its content dynamically. Generally there are
     three layouts: 1) player name input - if player got into top 3; 2) show game over - if player did not
     score to top 3; 3) show_top_rank - shows in any case before exiting from game
-    :param screen: game main screen
     :param score: player current score
     :param player_name: player name
     :param scores_data: list of top 3 results
