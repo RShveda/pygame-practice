@@ -1,5 +1,12 @@
 import pygame
-from models import score, increment_score
+from random import random
+import constants as cons
+import models
+from views import draw_scoreboard, game_over_view
+
+
+is_game_over = False
+show_ranking = False
 
 
 def click(event: pygame.MOUSEBUTTONDOWN, balls: list):
@@ -8,7 +15,6 @@ def click(event: pygame.MOUSEBUTTONDOWN, balls: list):
     the ball from list of existing balls.
     :param event: pygame MOUSEBUTTONDOWN event
     :param balls: list of existing balls
-    :param score: player current score
     :return: score
     """
     for ball in balls:
@@ -16,7 +22,44 @@ def click(event: pygame.MOUSEBUTTONDOWN, balls: list):
         distance = ((coords[0] - event.pos[0])**2 + (coords[1] - event.pos[1])**2)**0.5
         if int(distance) < radius:
             if ball[0]:
-                increment_score(1)
+                models.increment_score(1)
             else:
-                increment_score(2)
+                models.increment_score(2)
             balls.remove(ball)
+
+
+def user_controller_tick(is_finished):
+    global show_ranking
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return not is_finished
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if not is_game_over:
+                click(event, models.balls)
+        elif event.type == pygame.KEYDOWN:
+            if is_game_over:
+                if show_ranking:
+                    if event.key == pygame.K_RETURN:
+                        is_finished = True
+                else:
+                    if event.key == pygame.K_RETURN:
+                        models.add_to_ranking()
+                        models.reset_score()
+                        models.save_scores()
+                        show_ranking = True
+                    else:
+                        models.edit_player_name(event)
+    return is_finished
+
+
+def system_controller_tick():
+    global is_game_over
+    models.move_balls()
+    if show_ranking is False:  # hides score board after user inputted name
+        draw_scoreboard()
+    if len(models.balls) < cons.MAX_BALLS:
+        if random() < 0.2:
+            models.new_ball()
+    else:
+        game_over_view(show_ranking)
+        is_game_over = True

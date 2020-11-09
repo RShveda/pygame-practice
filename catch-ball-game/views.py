@@ -19,8 +19,6 @@ def blank_screen():
 def draw_scoreboard():
     """
     Function that draw current player score in top left corner of game screen
-    :param score: current player score
-    :return:
     """
     text = "Your score is {}".format(models.score)
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
@@ -79,9 +77,6 @@ def game_over_view(show_ranking: bool):
     Function that draw game over screen and updates its content dynamically. Generally there are
     three layouts: 1) player name input - if player got into top 3; 2) show game over - if player did not
     score to top 3; 3) show_top_rank - shows in any case before exiting from game
-    :param score: player current score
-    :param player_name: player name
-    :param scores_data: list of top 3 results
     :param show_ranking: flag that tells when to proceed to showing top 3 ranking
     """
     gameover_surface = pygame.Surface((cons.WIDTH/1.5, cons.HEIGHT/2), pygame.SRCALPHA)
@@ -104,7 +99,7 @@ def game_over_view(show_ranking: bool):
     screen.blit(gameover_surface, coords)
 
 
-def is_winner(score: int, scores_data: list) -> int:
+def is_winner(score: int, scores_data: list) -> bool:
     """
     Helper function which check if player got into top 3.
     :param score: current player score

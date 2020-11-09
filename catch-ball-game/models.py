@@ -39,7 +39,6 @@ def new_ball():
     radius - integer, distance from center to edges (for creeps this value is not precise)
     fill - for regular ball it will be a color (RGB), for creeps it will be a name of file
     that holds an image
-    :param balls: list that holds existing balls parameters
     """
     x_direction = uniform(-1, 1)
     y_direction = uniform(-1, 1)
@@ -64,7 +63,6 @@ def move_balls():
     Function that move balls on a game surface. It calculates ball new position and direction
     according to a speed modifier and possible collisions with walls. Then it draw balls in those
     positions.
-    :param balls: list that holds existing balls parameters
     """
     for key, ball in enumerate(balls):
         is_ball, coords, direction, radius, fill = ball
@@ -126,9 +124,6 @@ def add_to_ranking():
     """
     Helper function to insert player result into top 3 list.
     position.
-    :param score: player final score
-    :param player_name: player name
-    :param scores_data: current list of top 3 results
     :return: updated list of top 3 results
     """
     global scores_data
@@ -143,7 +138,6 @@ def add_to_ranking():
 def save_scores():
     """
     Function is responsible for writing a list of top score records into json file.
-    :param scores_data: list of objects that hold top 3 scores.
     """
     if (len(scores_data) == 3 and
             type(scores_data) == list):
