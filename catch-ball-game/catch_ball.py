@@ -1,6 +1,7 @@
 import pygame
 from random import random
-from models import save_scores, load_scores, new_ball, move_balls, add_to_ranking
+from models import (save_scores, load_scores, new_ball, move_balls, add_to_ranking, reset_score,
+                    scores_data, score, balls, player_name, edit_player_name)
 from views import draw_scoreboard, game_over_view, blank_screen
 from controllers import click
 import constants as cons
@@ -13,10 +14,11 @@ def main():
     """
     pygame.init()
     clock = pygame.time.Clock()
-    scores_data = load_scores()
-    score = 0
-    balls = []
-    player_name = ''
+    load_scores()
+    # scores_data = load_scores()
+    # score = 0
+    # balls = []
+    # player_name = ''
     is_finished = False
     is_game_over = False
     show_ranking = False
@@ -28,7 +30,7 @@ def main():
                 is_finished = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if not is_game_over:
-                    score = click(event, balls, score)
+                    click(event, balls)
             elif event.type == pygame.KEYDOWN:
                 if is_game_over:
                     if show_ranking:
@@ -36,22 +38,20 @@ def main():
                             is_finished = True
                     else:
                         if event.key == pygame.K_RETURN:
-                            scores_data = add_to_ranking(score, player_name, scores_data)
-                            score = 0
-                            save_scores(scores_data)
+                            add_to_ranking()
+                            reset_score()
+                            save_scores()
                             show_ranking = True
-                        elif event.key == pygame.K_BACKSPACE:
-                            player_name = player_name[:-1]
                         else:
-                            player_name += event.unicode
-        move_balls(balls)
+                            edit_player_name(event)
+        move_balls()
         if show_ranking is False:  # hides score board after user inputted name
-            draw_scoreboard(score)
+            draw_scoreboard()
         if len(balls) < cons.MAX_BALLS:
             if random() < 0.2:
-                new_ball(balls)
+                new_ball()
         else:
-            game_over_view(score, player_name, scores_data, show_ranking)
+            game_over_view(show_ranking)
             is_game_over = True
         pygame.display.update()
         blank_screen()

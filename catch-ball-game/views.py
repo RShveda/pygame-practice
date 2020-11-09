@@ -2,6 +2,7 @@ import pygame
 from pygame.draw import *
 import numpy as np
 import constants as cons
+import models
 
 
 screen = pygame.display.set_mode((cons.WIDTH, cons.HEIGHT))
@@ -15,13 +16,13 @@ def blank_screen():
     screen.fill(cons.BLACK)
 
 
-def draw_scoreboard(score: int):
+def draw_scoreboard():
     """
     Function that draw current player score in top left corner of game screen
     :param score: current player score
     :return:
     """
-    text = "Your score is {}".format(score)
+    text = "Your score is {}".format(models.score)
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
     textsurface = myfont.render(text, False, (255, 255, 255))
     screen.blit(textsurface, (0, 0))
@@ -73,8 +74,7 @@ def text_area(text: str, surface: pygame.Surface, position: float):
     surface.blit(text_surface, coords)
 
 
-def game_over_view(score: int, player_name: str,
-                   scores_data: list, show_ranking: bool):
+def game_over_view(show_ranking: bool):
     """
     Function that draw game over screen and updates its content dynamically. Generally there are
     three layouts: 1) player name input - if player got into top 3; 2) show game over - if player did not
@@ -87,17 +87,17 @@ def game_over_view(score: int, player_name: str,
     gameover_surface = pygame.Surface((cons.WIDTH/1.5, cons.HEIGHT/2), pygame.SRCALPHA)
     gameover_surface_size = gameover_surface.get_size()
     text_area("GAME OVER", gameover_surface, 0)
-    player_rank = is_winner(score, scores_data)
+    player_rank = is_winner(models.score, models.scores_data)
     if player_rank:  # player_name_input
         text_area("You got into TOP 3!", gameover_surface, 0.5)
         text_area("Type your name:", gameover_surface, 1)
-        text_area("{}_".format(player_name), gameover_surface, 2)
+        text_area("{}_".format(models.player_name), gameover_surface, 2)
     else:
         if not show_ranking:  # show_game_over
             text_area("Press Enter to continue", gameover_surface, 0.5)
         else:  # show_top_rank
             text_area("Best results:", gameover_surface, 0.5)
-            for position, record in enumerate(scores_data):
+            for position, record in enumerate(models.scores_data):
                 text_area(str(position+1) + ". {} - {}".format(record["name"], record["score"]),
                           gameover_surface, position*0.5+1)
     coords = ((cons.WIDTH - gameover_surface_size[0])/2, (cons.HEIGHT - gameover_surface_size[1])/2)

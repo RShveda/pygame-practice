@@ -5,7 +5,31 @@ import constants as cons
 import json
 
 
-def new_ball(balls: list):
+scores_data = []
+score = 0
+balls = []
+player_name = ''
+
+
+def edit_player_name(event):
+    global player_name
+    if event.key == pygame.K_BACKSPACE:
+        player_name = player_name[:-1]
+    else:
+        player_name += event.unicode
+
+
+def increment_score(points: int):
+    global score
+    score += points
+
+
+def reset_score():
+    global score
+    score = 0
+
+
+def new_ball():
     """
     Function which creates a new ball (or creep type of ball) and adds it to list of existing
     balls. Each ball holds following params:
@@ -35,17 +59,16 @@ def new_ball(balls: list):
         balls.append((is_ball, (x, y), (x_direction, y_direction), radius, color))
 
 
-def move_balls(balls: list):
+def move_balls():
     """
     Function that move balls on a game surface. It calculates ball new position and direction
     according to a speed modifier and possible collisions with walls. Then it draw balls in those
     positions.
     :param balls: list that holds existing balls parameters
     """
-    speed = 5
     for key, ball in enumerate(balls):
         is_ball, coords, direction, radius, fill = ball
-        shifted_ball = shift_ball(ball, speed)
+        shifted_ball = shift_ball(ball)
         new_direction, new_coords = bounce_off_walls(shifted_ball)
         balls[key] = (is_ball, new_coords, new_direction, radius, fill)
         if ball[0]:
@@ -55,7 +78,7 @@ def move_balls(balls: list):
             blit_creep(balls[key])
 
 
-def shift_ball(ball: tuple, speed: int):
+def shift_ball(ball: tuple, speed: int = 5):
     """
     Function to update ball position according to a speed.
     :param ball: tuple that holds ball params
@@ -99,7 +122,7 @@ def bounce_off_walls(ball: tuple):
     return (direction_x, direction_y), (coords_x, coords_y)
 
 
-def add_to_ranking(score: int, player_name: str, scores_data: list):
+def add_to_ranking():
     """
     Helper function to insert player result into top 3 list.
     position.
@@ -108,15 +131,16 @@ def add_to_ranking(score: int, player_name: str, scores_data: list):
     :param scores_data: current list of top 3 results
     :return: updated list of top 3 results
     """
+    global scores_data
     for position, record in enumerate(scores_data):
         if score > record["score"]:
             new_record = {"name": player_name, "score": score}
             scores_data.insert(position, new_record)
-            return scores_data[:3]
-    return scores_data[:3]
+            break  # prevents infinite loop
+    scores_data = scores_data[0:3]
 
 
-def save_scores(scores_data: list):
+def save_scores():
     """
     Function is responsible for writing a list of top score records into json file.
     :param scores_data: list of objects that hold top 3 scores.
@@ -125,6 +149,9 @@ def save_scores(scores_data: list):
             type(scores_data) == list):
         with open('scores.json', 'w') as f:
             json.dump(scores_data, f)
+        print("data saved")
+    else:
+        print("invalid data" + str(scores_data))
 
 
 def load_scores():
@@ -132,14 +159,13 @@ def load_scores():
     Function extract data (top3 scores) from json file.
     :return: list of objects holding top 3 scores or zero records if json file does not exist.
     """
-
+    global scores_data
     try:
         with open('scores.json', 'r') as f:
-            data = json.load(f)
+            scores_data = json.load(f)
     except OSError:
-        data = [
+        scores_data = [
             {"name": "empty", "score": 0},
             {"name": "empty", "score": 0},
             {"name": "empty", "score": 0},
         ]
-    return data
