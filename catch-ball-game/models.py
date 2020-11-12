@@ -4,29 +4,17 @@ from views import blit_creep, blit_circle
 import constants as cons
 import json
 
-
+# top 3 scores
 scores_data = []
+
+# current user score
 score = 0
+
+# list of active balls
 balls = []
+
+# current player name
 player_name = ''
-
-
-def edit_player_name(event):
-    global player_name
-    if event.key == pygame.K_BACKSPACE:
-        player_name = player_name[:-1]
-    else:
-        player_name += event.unicode
-
-
-def increment_score(points: int):
-    global score
-    score += points
-
-
-def reset_score():
-    global score
-    score = 0
 
 
 def new_ball():
@@ -118,6 +106,31 @@ def bounce_off_walls(ball: tuple):
             if random() < 0:
                 direction_y *= -1
     return (direction_x, direction_y), (coords_x, coords_y)
+
+
+def increment_score(points: int):
+    """
+    Function to increment users score by a given number of points.
+    :param points: positive integer
+    """
+    global score
+    score += points
+
+
+def reset_score():
+    """
+    Function that re-set users score to zero.
+    """
+    global score
+    score = 0
+
+
+def edit_player_name(event):
+    global player_name
+    if event.key == pygame.K_BACKSPACE:
+        player_name = player_name[:-1]
+    else:
+        player_name += event.unicode
 
 
 def add_to_ranking():

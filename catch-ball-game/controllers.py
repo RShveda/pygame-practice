@@ -29,7 +29,13 @@ def click(event: pygame.MOUSEBUTTONDOWN, balls: list):
 
 
 def user_controller_tick(is_finished):
-    global show_ranking
+    """
+    This function is responsible for handling user input during active game stage (clicks) and
+    during game finish stage.
+    :param is_finished: flag that controls if game loop should be terminated
+    :return: is_finished
+    """
+    global show_ranking  # flag that allow showing top 3 ranking and to finish the game
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             return not is_finished
@@ -53,6 +59,10 @@ def user_controller_tick(is_finished):
 
 
 def system_controller_tick():
+    """
+    This function fetch system state and trigger main game events such as: create new balls, move existing
+    balls, show scoreboard, initiate game finish.
+    """
     global is_game_over
     models.move_balls()
     if show_ranking is False:  # hides score board after user inputted name

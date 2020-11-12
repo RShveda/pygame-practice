@@ -9,6 +9,9 @@ screen = pygame.display.set_mode((cons.WIDTH, cons.HEIGHT))
 
 
 def blit_circle(color, coords, radius):
+    """
+    Draw a pygame.circle.
+    """
     circle(screen, color, coords, radius)
 
 
