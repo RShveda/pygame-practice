@@ -1,2 +1,2 @@
 gun.py
-gun.obfuscated.py
+gun_obfuscated.py
