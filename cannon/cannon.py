@@ -19,10 +19,12 @@ class App:
             self._running = False
 
     def on_loop(self, game_round):
-        if random.random() < 0.1:
+        if random.random() < 0:
             new_target = Target(self)
             new_target.on_init()
             game_round.add_new_target(new_target)
+        if pygame.mouse.get_focused():
+            game_round.cannon.set_aim(pygame.mouse.get_pos())
 
     def on_render(self, game_round):
         surface = self._display_surf
@@ -34,8 +36,6 @@ class App:
         pygame.quit()
 
     def on_execute(self):
-        # if self.on_init() == False:
-        #     self._running = False
         self.on_init()
         game_round = GameRound()
         cannon = Cannon(self)
@@ -60,6 +60,9 @@ class GameRound:
     def add_new_target(self, target):
         self.targets.append(target)
 
+    def add_new_bullet(self, bullet):
+        self.bullets.append(bullet)
+
     def set_cannon(self, cannon):
         self.cannon = cannon
 
@@ -67,6 +70,8 @@ class GameRound:
         self.cannon.draw(surface)
         for target in self.targets:
             target.draw(surface)
+        for bullet in self.bullets:
+            bullet.draw(surface)
 
     def move_objects(self):
         pass
@@ -117,14 +122,31 @@ class Cannon(GameObject):
         super().__init__(app)
         self._radius = 5
         self._direction = (0, 0)
+        self._load = 0
+        self._aim = ()
 
     def on_init(self):
         self._position = (20, random.randint(50, self.app.height))
+        self._load = 5
+        self._aim = (self._position[0], self._position[1]+1)
         super().on_init()
         self._color = (255, 0, 0)
 
+    def load(self):
+        self._load += 1
+
+    def fire(self):
+        """ returns bullet start position, direction, and loaded force """
+        return self._position, self._aim, self._load
+
+    def set_aim(self, mouse_coords):
+        self._aim = mouse_coords
+
     def draw(self, surface):
-        circle(surface, self._color, self._position, self._radius)
+        for i in range(self._load+1):
+            adjustment = (self._aim[0]-self._position[0])/surface.get_width(), (self._aim[1]-self._position[1])/surface.get_height()
+            position = self._position[0] + adjustment[0]*i, self._position[1] + adjustment[1]*i
+            circle(surface, self._color, position, self._radius)
 
 
 if __name__ == "__main__":
