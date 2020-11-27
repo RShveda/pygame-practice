@@ -24,10 +24,8 @@ class App:
             self._running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             self._mouse_button = True
-            print("pressed")
         elif event.type == pygame.MOUSEBUTTONUP:
             self._mouse_button = False
-            print("release")
 
     def on_loop(self, game_round):
         if random.random() < 0.01:
@@ -41,6 +39,7 @@ class App:
             game_round.add_new_bullet(bullet_params)
             game_round.cannon.load_reset()
         game_round.move_objects()
+        game_round.collision_check()
 
     def on_render(self, game_round):
         surface = self._display_surf
@@ -55,6 +54,7 @@ class App:
         self.on_init()
         game_round = GameRound(self)
         game_round.set_cannon()
+        game_round.set_scoreboard()
         while self._running:
             self.clock.tick(self.FPS)
             for event in pygame.event.get():
@@ -62,6 +62,20 @@ class App:
             self.on_loop(game_round)
             self.on_render(game_round)
         self.on_cleanup()
+
+
+class ScoreBoardView:
+
+    def __init__(self, size):
+        self.width = size[0] // 8
+        self.height = size[1] // 16
+        self.font = pygame.font.SysFont('Comic Sans MS', 30)
+        self.font_color = (0, 0, 0)
+
+    def draw(self, score, surface):
+        text = "Your score is {}".format(score)
+        textsurface = self.font.render(text, False, self.font_color)
+        surface.blit(textsurface, (0, 0))
 
 
 class GameRound:
@@ -72,6 +86,7 @@ class GameRound:
         self.app = app
         self.cannon = None
         self.scoreboard = None
+        self.score = 0
 
     def add_new_target(self):
         new_target = Target(self.app)
@@ -88,8 +103,13 @@ class GameRound:
         cannon.on_init()
         self.cannon = cannon
 
+    def set_scoreboard(self):
+        scoreboard = ScoreBoardView(self.app.size)
+        self.scoreboard = scoreboard
+
     def draw_objects(self, surface):
         self.cannon.draw(surface)
+        self.scoreboard.draw(self.score, surface)
         for target in self.targets:
             target.draw(surface)
         for bullet in self.bullets:
@@ -98,6 +118,18 @@ class GameRound:
     def move_objects(self):
         for bullet in self.bullets:
             bullet.move()
+        for target in self.targets:
+            target.move()
+
+    def collision_check(self):
+        for bullet in self.bullets:
+            for target in self.targets:
+                distance = ((target.get_position()[0] - bullet.get_position()[0])**2 +
+                            (target.get_position()[1] - bullet.get_position()[1])**2)**0.5
+                if int(distance) < target.get_radius()+bullet.get_radius():
+                    target.on_destroy()
+                    self.score += 1
+                    self.targets.remove(target)
 
 
 class GameObject:
@@ -119,10 +151,18 @@ class GameObject:
         pass
 
     def move(self):
-        pass
+        coords_x = self._position[0] + self._direction[0] * self._speed
+        coords_y = self._position[1] + self._direction[1] * self._speed
+        self._position = (coords_x, coords_y)
 
     def draw(self, surface):
         pass
+
+    def get_position(self):
+        return self._position
+
+    def get_radius(self):
+        return self._radius
 
 
 class Target(GameObject):
@@ -134,7 +174,8 @@ class Target(GameObject):
     def on_init(self):
         self._position = (random.randint(100, self.app.width), random.randint(0, self.app.height))
         self._radius = (random.randint(10, self.app.width/16))
-        self._direction = (random.randint(-3, 3), random.randint(-3, 3))
+        self._direction = (random.randint(-2, 2), random.randint(-2, 2))
+        self._speed = random.randint(1, 2)
         super().on_init()
 
     def draw(self, surface):
@@ -192,11 +233,6 @@ class Bullet(GameObject):
     def draw(self, surface):
         # print(self._color, self._position, self._radius)
         circle(surface, self._color, self._position, self._radius)
-
-    def move(self):
-        coords_x = self._position[0] + self._direction[0]*self._speed
-        coords_y = self._position[1] + self._direction[1]*self._speed
-        self._position = (coords_x, coords_y)
 
 
 if __name__ == "__main__":
