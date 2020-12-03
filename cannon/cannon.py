@@ -138,6 +138,7 @@ class GameObject:
         self._position = ()
         self._size = ()
         self._direction = ()
+        self._aim = ()
         self._color = ()
         self._speed = 0
         self._radius = 0
@@ -194,9 +195,10 @@ class Cannon(GameObject):
         self._direction = (self._position[0], self._position[1]+1)
         super().on_init()
         self._color = (255, 0, 0)
+        self._aim = (self.app.width/2, self.app.height/2)
 
     def load(self):
-        self._load += 3
+        self._load += 0.3
 
     def is_loaded(self):
         return self._load
@@ -206,15 +208,16 @@ class Cannon(GameObject):
 
     def fire(self):
         """ returns bullet start position, direction, and loaded force """
-        return self._position, self._direction, self._load
+        return self._position, self._aim, self._load
 
     def set_aim(self, mouse_coords):
-        aim = mouse_coords
-        self._direction = (aim[0] - self._position[0]) / 4000, (aim[1] - self._position[1]) / 4000
+        distance = [mouse_coords[0] - self._position[0], mouse_coords[1] - self._position[1]]
+        norm = (distance[0] ** 2 + distance[1] ** 2) ** 0.5
+        self._aim = (distance[0] / norm, distance[1] / norm)
 
     def draw(self, surface):
-        for i in range((self._load+10)*10):
-            position = self._position[0] + self._direction[0]*i, self._position[1] + self._direction[1]*i
+        for i in range(int(self._load+10)*2):
+            position = self._position[0] + self._aim[0]*i, self._position[1] + self._aim[1]*i
             circle(surface, self._color, position, self._radius)
 
 
