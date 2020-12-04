@@ -8,7 +8,7 @@ class App:
     def __init__(self):
         self._running = True
         self._display_surf = None
-        self.size = self.width, self.height = 640, 400
+        self.size = self.width, self.height = 1280, 800
         self._mouse_button = False
         self.clock = None
         self.FPS = 30
