@@ -8,7 +8,7 @@ class App:
     def __init__(self):
         self._running = True
         self._display_surf = None
-        self.size = self.width, self.height = 1280, 800
+        self.size = self.width, self.height = int(1280*1.6), int(800*1.6)
         self._mouse_button = False
         self.clock = None
         self.FPS = 30
@@ -69,7 +69,7 @@ class ScoreBoardView:
     def __init__(self, size):
         self.width = size[0] // 8
         self.height = size[1] // 16
-        self.font = pygame.font.SysFont('Comic Sans MS', 30)
+        self.font = pygame.font.SysFont('Comic Sans MS', 50)
         self.font_color = (0, 0, 0)
 
     def draw(self, score, surface):
@@ -151,10 +151,32 @@ class GameObject:
     def on_destroy(self):
         pass
 
+    def bounce_off_walls(self):
+        """
+
+        """
+        direction_x, direction_y = self._direction
+        coords_x, coords_y = self._position
+        if coords_x < 0 + self._radius:
+            coords_x = self._radius
+            direction_x *= -1
+        elif coords_x > self.app.width - self._radius:
+            coords_x = self.app.width - self._radius
+            direction_x *= -1
+        elif coords_y < 0 + self._radius:
+            coords_y = self._radius
+            direction_y *= -1
+        elif coords_y > self.app.height - self._radius:
+            coords_y = self.app.height - self._radius
+            direction_y *= -1
+        self._position = (coords_x, coords_y)
+        self._direction = (direction_x, direction_y)
+
     def move(self):
         coords_x = self._position[0] + self._direction[0] * self._speed
         coords_y = self._position[1] + self._direction[1] * self._speed
         self._position = (coords_x, coords_y)
+        self.bounce_off_walls()
 
     def draw(self, surface):
         pass
